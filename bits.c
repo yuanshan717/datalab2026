@@ -19,7 +19,7 @@
  * Difficulty: 1
  */
 int bitAnd(int x, int y) {
-    return 2;
+    return ~(~x|~y);
 }
 
 /*
@@ -30,7 +30,7 @@ int bitAnd(int x, int y) {
  *   Difficulty: 1
  */
 int bitXor(int x, int y) {
-    return 2;
+    return (~(~x&~y)) & (~(x&y));
 }
 
 /*
@@ -50,7 +50,10 @@ int bitXor(int x, int y) {
  *   1 if x and y have the same sign , 0 otherwise.
  */
 int samesign(int x, int y) {
-    return 2;
+    if(!x && !y)return 1;
+    if(!x && y)return 0;
+    if(x && !y)return 0;
+    return !((x^y)>>31)&1;
 }
 
 /*
@@ -63,7 +66,8 @@ int samesign(int x, int y) {
  *   Difficulty: 4
  */
 int logtwo(int v) {
-    return 2;
+
+    return 0;
 }
 
 /*
@@ -76,7 +80,12 @@ int logtwo(int v) {
  *    Difficulty: 2
  */
 int byteSwap(int x, int n, int m) {
-    return 2;
+    int a = n<<3;
+    int b = m<<3;
+    int temp1 = ((x>>a)&0xFF)<<b;
+    int temp2 = ((x>>b)&0xFF)<<a;
+    int clear = (0xFF << a) | (0xFF<<b);
+    return (x & ~clear) | temp1 | temp2;
 }
 
 /*
@@ -88,7 +97,13 @@ int byteSwap(int x, int n, int m) {
  *   Difficulty: 3
  */
 unsigned reverse(unsigned v) {
-    return 2;
+    unsigned temp1 = v & 0xFFFF;
+    unsigned res1 = (temp1<<16) | (v>>16);
+    unsigned res2 = ((res1 & 0xFF00FF00)>>8) | ((res1 & 0x00FF00FF)<<8);
+    unsigned res3 = ((res2 & 0xF0F0F0F0)>>4) | ((res2 & 0x0F0F0F0F)<<4);
+    unsigned res4 = ((res3 & 0xCCCCCCCC)>>2) | ((res3 & 0x33333333)<<2);
+    unsigned res5 = ((res4 & 0xAAAAAAAA)>>1) | ((res4 & 0x55555555)<<1);
+    return res5;
 }
 
 /*
@@ -100,7 +115,10 @@ unsigned reverse(unsigned v) {
  *   Difficulty: 3
  */
 int logicalShift(int x, int n) {
-    return 2;
+    int temp = 0x80000000;
+    int mask = ~(temp >> n << 1);
+    int res = (x>>n)&mask;
+    return res;
 }
 
 /*
@@ -112,6 +130,7 @@ int logicalShift(int x, int n) {
  *   Difficulty: 4
  */
 int leftBitCount(int x) {
+    
     return 2;
 }
 
