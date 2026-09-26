@@ -66,8 +66,26 @@ int samesign(int x, int y) {
  *   Difficulty: 4
  */
 int logtwo(int v) {
+    int res = 0;
+    int shift;
 
-    return 0;
+    shift = (v > 0xFFFF) << 4;  
+    res = res | shift;
+    v = v >> shift;
+    shift = (v >0xFF) << 3;
+    res = res | shift;
+    v = v >> shift;
+    shift = (v >0xF) << 2;
+    res = res | shift;
+    v = v >> shift;
+    shift = (v >0x3) << 1;
+    res = res | shift;
+    v = v >> shift;
+    shift = v > 1;
+    res = res | shift;
+
+    return res;
+
 }
 
 /*
@@ -130,7 +148,7 @@ int logicalShift(int x, int n) {
  *   Difficulty: 4
  */
 int leftBitCount(int x) {
-    
+
     return 2;
 }
 
