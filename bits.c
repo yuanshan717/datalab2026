@@ -148,9 +148,34 @@ int logicalShift(int x, int n) {
  *   Difficulty: 4
  */
 int leftBitCount(int x) {
+    int res = 0;
+    int shift = 0;
+    shift = (!~(x>>16))<<4;
+    res += shift;
+    x = x<<shift;
 
-    return 2;
+    shift = (!~(x>>24))<<3;
+    res += shift;
+    x = x<<shift;
+
+    shift = (!~(x>>28))<<2;
+    res += shift;
+    x = x<<shift;
+
+    shift = (!~(x>>30))<<1;
+    res += shift;
+    x = x<<shift;
+
+    shift = (!~(x>>31));
+    res += shift;
+    x = x<<shift;
+
+    shift = (!~(x>>31));
+    res += shift;
+
+    return res;
 }
+
 
 /*
  * float_i2f - Return bit-level equivalent of expression (float) x
@@ -161,7 +186,7 @@ int leftBitCount(int x) {
  *   Difficulty: 4
  */
 unsigned float_i2f(int x) {
-    return 2;
+    return 0;
 }
 
 /*
