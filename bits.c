@@ -186,29 +186,26 @@ int leftBitCount(int x) {
  *   Difficulty: 4
  */
 unsigned float_i2f(int x) {
-    unsigned sign, ux, exp, frac, shift, tail;
-
     if (x == 0) return 0;
-    sign = 0;
-    if (x < 0) { sign = 1 << 31; x = -x; }
-    ux = x;
 
-    exp = 0;
-    if (ux >> 16) { exp += 16; ux >>= 16; }
-    if (ux >>  8) { exp +=  8; ux >>=  8; }
-    if (ux >>  4) { exp +=  4; ux >>=  4; }
-    if (ux >>  2) { exp +=  2; ux >>=  2; }
-    if (ux >>  1) { exp +=  1; }
-    ux = x; if (x < 0) ux = ~(unsigned)x + 1;
+        unsigned sign, ux, frac;
+        int exp = 158;
 
-    if (exp < 24) return sign | ((exp + 127) << 23) | ((ux << (23 - exp)) & 0x7fffff);
+        sign = x & 0x80000000u;
+        ux = x;
 
-    shift = exp - 23;
-    frac  = ux >> shift;
-    tail  = ux << (32 - shift);
-    frac += (tail >> 31) & ((tail << 1) | (frac & 1));
-    if (frac >> 24) { frac = 1 << 23; exp++; }
-    return sign | ((exp + 127) << 23) | (frac & 0x7fffff);
+        if (sign) ux = ~ux + 1;
+
+        while (!(ux & 0x80000000u)) {
+            ux <<= 1;
+            exp -= 1;
+        }
+
+        frac = (ux >> 8) & 0x7FFFFFu;
+        if ((ux & 0xFFu) > 0x80u) frac += 1;
+        if ((ux & 0x1FFu) == 0x180u) frac += 1;
+
+        return sign + (exp << 23) + frac;
 }
 
 /*
