@@ -186,30 +186,29 @@ int leftBitCount(int x) {
  *   Difficulty: 4
  */
 unsigned float_i2f(int x) {
-    if(x==0) return 0;
-    if(x==0x80000000) return 0xCF000000;
-    unsigned sign=(x>>31)&1;
-    unsigned exp=0;
-    unsigned frac=0;
-    if(sign==1) x=~x+1;
-    for(int i=31;i>=0;i--)
-    {
-        if(x>>i>0)
-        {
-            exp=i+127;
-            break;
-        }
-    }
-    if(exp-127<=23) frac=((x&(~(1u<<(exp-127))))<<(23-(exp-127)))&0x7FFFFF;
-    else
-    {
-        unsigned sticky=x&((1<<((exp-127)-24))-1);
-        frac=((x&(~(1u<<(exp-127))))>>((exp-127)-24))&0xFFFFFF;
-        if((frac&0x1)==1&&(sticky||((frac&0x2)>>1)==1)) frac++;
-        frac>>=1;
-        if(frac>0x007FFFFF){frac=0;exp+=1;}
-    }
-    return (sign<<31)|(exp<<23)|frac;
+    unsigned sign, ux, exp, frac, shift, tail;
+
+    if (x == 0) return 0;
+    sign = 0;
+    if (x < 0) { sign = 1 << 31; x = -x; }
+    ux = x;
+
+    exp = 0;
+    if (ux >> 16) { exp += 16; ux >>= 16; }
+    if (ux >>  8) { exp +=  8; ux >>=  8; }
+    if (ux >>  4) { exp +=  4; ux >>=  4; }
+    if (ux >>  2) { exp +=  2; ux >>=  2; }
+    if (ux >>  1) { exp +=  1; }
+    ux = x; if (x < 0) ux = ~(unsigned)x + 1;
+
+    if (exp < 24) return sign | ((exp + 127) << 23) | ((ux << (23 - exp)) & 0x7fffff);
+
+    shift = exp - 23;
+    frac  = ux >> shift;
+    tail  = ux << (32 - shift);
+    frac += (tail >> 31) & ((tail << 1) | (frac & 1));
+    if (frac >> 24) { frac = 1 << 23; exp++; }
+    return sign | ((exp + 127) << 23) | (frac & 0x7fffff);
 }
 
 /*
