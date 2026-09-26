@@ -186,7 +186,30 @@ int leftBitCount(int x) {
  *   Difficulty: 4
  */
 unsigned float_i2f(int x) {
-    return 0;
+    if(x==0) return 0;
+    if(x==0x80000000) return 0xCF000000;
+    unsigned sign=(x>>31)&1;
+    unsigned exp=0;
+    unsigned frac=0;
+    if(sign==1) x=~x+1;
+    for(int i=31;i>=0;i--)
+    {
+        if(x>>i>0)
+        {
+            exp=i+127;
+            break;
+        }
+    }
+    if(exp-127<=23) frac=((x&(~(1u<<(exp-127))))<<(23-(exp-127)))&0x7FFFFF;
+    else
+    {
+        unsigned sticky=x&((1<<((exp-127)-24))-1);
+        frac=((x&(~(1u<<(exp-127))))>>((exp-127)-24))&0xFFFFFF;
+        if((frac&0x1)==1&&(sticky||((frac&0x2)>>1)==1)) frac++;
+        frac>>=1;
+        if(frac>0x007FFFFF){frac=0;exp+=1;}
+    }
+    return (sign<<31)|(exp<<23)|frac;
 }
 
 /*
@@ -201,7 +224,14 @@ unsigned float_i2f(int x) {
  *   Difficulty: 4
  */
 unsigned floatScale2(unsigned uf) {
-    return 2;
+    unsigned exp = (uf >> 23) & 0xFF;
+    if (exp == 0xFF) {
+        return uf;
+    }
+    if (exp == 0) {
+        return (uf & 0x80000000) | (uf << 1);
+    }
+    return uf + (1 << 23);
 }
 
 /*
@@ -218,7 +248,32 @@ unsigned floatScale2(unsigned uf) {
  *   Difficulty: 3
  */
 int float64_f2i(unsigned uf1, unsigned uf2) {
-    return 2;
+    unsigned sign = uf2 >> 31;
+    unsigned exp = (uf2 >> 20) & 0x7FF;
+    
+    if (exp < 1023) {
+        return 0;
+    }
+    if (exp >= 1054) {
+        return 0x80000000;
+    }
+    
+    unsigned shift = exp - 1023;
+    unsigned high = (uf2 & 0xFFFFF) | 0x100000;
+    unsigned low = uf1;
+    unsigned result;
+    
+    if (shift <= 20) {
+        result = high >> (20 - shift);
+    } else {
+        result = (high << (shift - 20)) | (low >> (52 - shift));
+    }
+    
+    if (sign) {
+        return ~result + 1;
+    }
+    
+    return result;
 }
 
 /*
@@ -235,5 +290,18 @@ int float64_f2i(unsigned uf1, unsigned uf2) {
  *   Difficulty: 4
  */
 unsigned floatPower2(int x) {
-    return 2;
+    if (x >= 128) {
+        return 0x7F800000;
+    }
+    
+    if (x >= -126) {
+        int exp = x + 127;
+        return exp << 23;
+    }
+    
+    if (x >= -149) {
+        return 1 << (x + 149);
+    }
+    
+    return 0;
 }
