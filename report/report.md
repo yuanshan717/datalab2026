@@ -1,48 +1,105 @@
 # datalab 报告
 
-姓名：张三
+姓名：凌小雅
 
-学号：2000000000
-
-| 总分 | bitXor | logtwo | byteSwap | reverse | ... |
-| --------- | ------------- | ------------- | ------------- | ----------------- |-----------|
-| 0.00         | 0.00             | 0.00             | 0.00             | 0.00 |···  |
-
+学号：2025200717
 
 test 截图：
+![alt text](image.png)
 
-
-<!-- TODO: 用一个通过的截图，本地图片，放到 imgs 文件夹下，不要用这个 github，pandoc 解析可能有问题 -->
 
 ## 解题报告
 
 ### 亮点
 
-<!-- 告诉助教哪些函数是你实现得最优秀的，比如你可以排序。不需要展开，展开请放到后文中。 -->
+1. logtwo
+2. leftBitCount
+3. float_i2f
 
-1. bitXor
-2. byteSwap
-
-### bitXor
+### logtwo
 
 ```c
-// 附上题目解题代码
+int logtwo(int v) {
+    int res = 0;
+    int shift;
+
+    shift = (v > 0xFFFF) << 4;  
+    res = res | shift;
+    v = v >> shift;
+    shift = (v >0xFF) << 3;
+    res = res | shift;
+    v = v >> shift;
+    shift = (v >0xF) << 2;
+    res = res | shift;
+    v = v >> shift;
+    shift = (v >0x3) << 1;
+    res = res | shift;
+    v = v >> shift;
+    shift = v > 1;
+    res = res | shift;
+
+    return res;
+
+}
 ```
 
 讲解题目思路
+在不能使用加法的情况下，利用从高位开始比较，通过移位找1的办法，寻找最高位1所在位置，并使用“ | ”代替加法功能，最终参考分治思路完成题目。
 
-### ......
+### leftBitCount
+```c
+int leftBitCount(int x) {
+    int res = 0;
+    int shift = 0;
+    shift = (!~(x>>16))<<4;
+    res += shift;
+    x = x<<shift;
 
+    shift = (!~(x>>24))<<3;
+    res += shift;
+    x = x<<shift;
+    //以此类推看高4位 高2位和高1位
+        shift = (!~(x>>31));
+    res += shift;
+    x = x<<shift;
+
+    shift = (!~(x>>31));
+    res += shift;
+    //最后移位要重复进行一次防止漏掉最后一位
+```
+讲解题目思路
+在logtwo的基础上，使用shift = (!~(x>>16))<<4;代替比较，巧妙避开“ > ”的使用。
+
+### float_i2f
+```c
+unsigned sign, ux, frac;
+        int exp = 158;
+
+        sign = x & 0x80000000u;
+        ux = x;
+
+        if (sign) ux = ~ux + 1;
+
+        while (!(ux & 0x80000000u)) {
+            ux <<= 1;
+            exp -= 1;
+        }
+        //找出frac对应位数
+        //向偶数取整
+        if ((ux & 0xFFu) > 0x80u) frac += 1;
+        if ((ux & 0x1FFu) == 0x180u) frac += 1;
+
+        return sign + (exp << 23) + frac;
+```
+
+讲解题目思路
+分别提取sign exp frac，其中exp设置为158（31 + 127）（$E_max + bias$）; 向偶数取整同样运用合理比较减少操作符使用。
 ## 反馈/收获/感悟/总结
-
-<!-- 这一节，你可以简单描述你在这个 lab 上花费的时间/你认为的难度/你认为不合理的地方/你认为有趣的地方 -->
-
-<!-- 或者是收获/感悟/总结 -->
-
-<!-- 200 字以内，可以不写 -->
+花费时间：约7h
+难度：较高
+合理：按照课堂讲解顺序，运算符->编码->int->浮点数
+有趣：部分算法在ai帮助下优化，发现ai（严格来说是前人）解法堪称天才，使人茅塞顿开。
 
 ## 参考的重要资料
-
-<!-- 有哪些文章/论文/PPT/课本对你的实现有重要启发或者帮助，或者是你直接引用了某个方法 -->
-
-<!-- 请附上文章标题和可访问的网页路径 -->
+课堂PPT：bitcount部分习题以及分治思想
+《深入理解计算机系统》第三版 浮点数 IEEE浮点表示部分。
