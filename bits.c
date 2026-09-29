@@ -53,7 +53,7 @@ int samesign(int x, int y) {
     if(!x && !y)return 1;
     if(!x && y)return 0;
     if(x && !y)return 0;
-    return !((x^y)>>31)&1;
+    return !((x^y)>>31);
 }
 
 /*
